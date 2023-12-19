@@ -81,7 +81,6 @@ const loginUser = async (req, res, next) => {
 const verifyToken = (req, res, next) => {
 
   // here we are getting token from req.headers["authorization"] which we are setting manullay 
-
   // const headers = req.headers["authorization"];
   // const token = headers.split(" ")[1];
 
@@ -91,7 +90,6 @@ const verifyToken = (req, res, next) => {
   console.log(token)
 
   // checking the validation of the token
-
   if (!token) {
     return res.status(404).json({ message: "No Token found" });
   }
