@@ -3,6 +3,7 @@ const router = require("./routes/userRoutes")
 const mongoose = require("mongoose")
 const cookieParser = require("cookie-parser")
 const cors = require("cors")
+require("dotenv").config()
 
 const app = express()
 
@@ -12,7 +13,7 @@ app.use(cookieParser())
 app.use(express.json())
 app.use("/api", router)
 
-mongoose.connect("mongodb+srv://ashish_mernAuth:mernAuth3@cluster0.lwdqpyi.mongodb.net/").then(()=>{
+mongoose.connect(process.env.MONGO_URI).then(()=>{
     app.listen(4000, ()=>{console.log("server started at http://localhost:4000")})
     console.log("Database Connected successfully")
 }).catch((error)=>{

@@ -33,7 +33,7 @@ const signupUser = async (req, res, next) => {
   try {
     await user.save();
   } catch (error) {
-    console.log("Error while add the user", error.message);
+    console.log("Error while adding the user", error.message);
   }
 
   return res.status(201).json({ message: user });
@@ -63,7 +63,7 @@ const loginUser = async (req, res, next) => {
 
   // creating token to authorize the users access
   const loginToken = jwt.sign({ id: exisitingUser._id }, JWT_SECRET_KEY, {
-    expiresIn: "30s",
+    expiresIn: "35s",
   });
 
 //   creating cookie using userId and token 
@@ -77,7 +77,9 @@ const loginUser = async (req, res, next) => {
   return res.status(200).json({message: "Successfully Logged In", loggedInUser: exisitingUser, loginToken,});
 };
 
-// verifying the created the token and extracting the user id 
+// AccessToken creation 
+
+// verifying the creation of the access token and extracting the user id for getting the user details
 const verifyToken = (req, res, next) => {
 
   // here we are getting token from req.headers["authorization"] which we are setting manullay 
@@ -87,7 +89,7 @@ const verifyToken = (req, res, next) => {
   // here we are getting token from cookie which we set and its gets automatically set in req.headers.cookie
   const cookies = req.headers.cookie
   const token = cookies.split("=")[1]
-  console.log(token)
+  // console.log(token)
 
   // checking the validation of the token
   if (!token) {
@@ -123,4 +125,45 @@ const getUser = async (req, res, next) => {
   return res.status(200).json({user})
 };
 
-module.exports = { signupUser, loginUser, verifyToken, getUser };
+
+const refreshToken = ( req, res, next) =>{
+
+  // getting the cookies from header
+  const cookies = req.headers.cookie
+  const prevToken = cookies.split("=")[1]
+
+  if(!prevToken){
+    return res.status(400).json({message:"token not found"})
+  }
+
+  // verifying the token 
+  jwt.verify(String(prevToken), JWT_SECRET_KEY, (err, user)=>{
+    if(err){
+      return res.status(403).json({message:"Authentication failed"})
+    }
+
+    // destorying the token 
+    res.clearCookie(`${user.id}`)
+    req.cookies[`${user.id}`]= ""
+
+    // creating the new token 
+    const token = jwt.sign({id: user.id}, JWT_SECRET_KEY, {
+      expiresIn:"35s"
+    })
+
+    res.cookie(String(user.id), token, {
+      path:"/",
+      httpOnly:true,
+      expires: new Date(Date.now + 1000*30), //30sec
+      sameSite:"lax"
+    })
+
+    req.id = user.id
+    next()
+  })
+
+
+
+}
+
+module.exports = { signupUser, loginUser, verifyToken, getUser, refreshToken };
