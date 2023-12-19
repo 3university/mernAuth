@@ -66,6 +66,12 @@ const loginUser = async (req, res, next) => {
     expiresIn: "35s",
   });
 
+
+  // checking if there is any exisiting cookie before generating after a successful login
+  if(req.cookies[`${exisitingUser._id}`]){
+    req.cookies[`${exisitingUser._id}`]=""
+  }
+
 //   creating cookie using userId and token 
     res.cookie(String(exisitingUser._id), loginToken, {
         path:"/",
