@@ -1,7 +1,11 @@
 import { Box, Button, TextField, Typography } from "@mui/material"
 import { useState } from "react"
+import axios from "axios"
+import { useNavigate } from "react-router-dom"
 
 const Signup = () =>{
+
+    const history = useNavigate()
 
     const [inputs, setInputs] = useState({
         name:"",
@@ -16,11 +20,22 @@ const Signup = () =>{
         }))
     }
 
+    const sendRequest = async() =>{
+        const res = await axios.post("http://localhost:4000/api/signup", {
+            name: inputs.name,
+            email: inputs.email,
+            password: inputs.password
+        }).catch((error)=>{
+            console.log("Error while sending data to backend", error.message)
+        })
+        const userData =  await res.data.message
+        return userData
+    }
     
 
     const handleSubmit = (e) =>{
         e.preventDefault()
-        console.log(inputs)
+        sendRequest().then(()=>history("/login"))
     }
 
     return(
